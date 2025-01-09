@@ -1,0 +1,21 @@
+{
+  "extends": [
+    "standard"
+  ],
+  "env": {
+    "node": true,
+    "es2021": true
+  },
+  "rules": {
+    "lines-around-comment": [
+      "error",
+      {
+        "beforeBlockComment": true,
+        "beforeLineComment": true,
+        "allowBlockStart": true,
+        "allowObjectStart": true,
+        "allowArrayStart": true
+      }
+    ]
+  }
+}
