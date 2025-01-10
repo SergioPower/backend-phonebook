@@ -7,6 +7,7 @@ const bodyParser = require('body-parser')
 const app = express()
 
 const Person = require('./models/person')
+const errorHandler = require('./middleware/errorHandler')
 
 app.use(cors())
 app.use(express.static('dist'))
@@ -22,37 +23,28 @@ app.use(
   morgan(':method :url :status :res[content-length] - :response-time ms :body')
 )
 
-const persons = [
-  {
-    id: 1,
-    name: 'Arto Hellas',
-    number: '040-123456'
-  },
-  {
-    id: 2,
-    name: 'Ada Lovelace',
-    number: '39-44-5323523'
-  },
-  {
-    id: 3,
-    name: 'Dan Abramov',
-    number: '12-43-234345'
-  },
-  {
-    id: 4,
-    name: 'Mary Poppendieck',
-    number: '39-23-6423122'
-  }
-]
-
-app.get('/api/persons', (request, response) => {
-  Person.find({}).then(persons => {
-    response.json(persons)
-  })
+app.get('/api/persons', (request, response, next) => {
+  Person.find({})
+    .then(persons => {
+      response.json(persons)
+    })
+    .catch(error => {
+      next(error)
+    })
 })
 
 app.get('/info', (request, response) => {
-  response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
+  Person.countDocuments()
+    .then(count => {
+      response.send(`
+        <p>Phonebook has info for ${count} people</p>
+        <p>${new Date()}</p>
+      `)
+    })
+    .catch(error => {
+      console.error('Error al contar los documentos:', error)
+      response.status(500).send('Error al obtener la información')
+    })
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -77,7 +69,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   if (!body.name || !body.number) {
@@ -86,31 +78,33 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  // if (persons.find(person => person.name === body.name)) {
-  //   return response.status(400).json({
-  //     error: 'name must be unique'
-  //   })
-  // }
-
   const person = new Person({
     name: body.name,
     number: body.number
   })
 
-  person.save().then(savedPerson => {
-    response.json(savedPerson)
-  })
+  person.save()
+    .then(savedPerson => {
+      response.json(savedPerson)
+    })
+    .catch(error => next(error))
 })
 
-const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
 
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
+  const person = {
+    name: body.name,
+    number: body.number
   }
 
-  next(error)
-}
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then(updatedPerson => {
+      response.json(updatedPerson)
+    })
+    .catch(error => next(error))
+})
+
 app.use(errorHandler)
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
