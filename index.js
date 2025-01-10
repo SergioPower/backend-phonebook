@@ -55,7 +55,7 @@ app.get('/info', (request, response) => {
   response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
       if (person) {
@@ -65,8 +65,7 @@ app.get('/api/persons/:id', (request, response) => {
       }
     })
     .catch(error => {
-      console.log(error)
-      response.status(500).send()
+      next(error)
     })
 })
 
@@ -102,6 +101,16 @@ app.post('/api/persons', (request, response) => {
   })
 })
 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+
+  next(error)
+}
+app.use(errorHandler)
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
