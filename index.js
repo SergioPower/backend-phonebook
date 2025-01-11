@@ -72,6 +72,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
+  // valida si hay contenido
   if (!body.name || !body.number) {
     return response.status(400).json({
       error: 'name or number missing'
