@@ -5,7 +5,7 @@
   "main": "node index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
+    "dev": "concurrently \"npm run dev --prefix ../frontend\" \"node index.js\"",
     "lint": "standard",
     "lint:fix": "standard --fix",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,7 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "cors": "2.8.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "16.4.7",
     "express": "4.21.2",
     "mongoose": "^8.9.3",
     "morgan": "1.10.0"
@@ -25,8 +25,9 @@
     "extends": "standard"
   },
   "devDependencies": {
+    "concurrently": "9.1.2",
     "nodemon": "3.1.9",
-    "prettier": "^3.4.2",
-    "standard": "^17.1.2"
+    "prettier": "3.4.2",
+    "standard": "17.1.2"
   }
 }

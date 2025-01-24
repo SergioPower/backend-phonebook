@@ -10,7 +10,7 @@ const Person = require('./models/person')
 const errorHandler = require('./middleware/errorHandler')
 
 app.use(cors())
-app.use(express.static('dist'))
+app.use(express.static('../frontend/dist'))
 app.use(express.json())
 app.use(bodyParser.json())
 
@@ -107,7 +107,7 @@ app.put('/api/persons/:id', (request, response, next) => {
 })
 
 app.use(errorHandler)
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3002
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
